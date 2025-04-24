@@ -142,6 +142,51 @@ python scripts/evaluate_performance.py
 
 ---
 
+## Usage Examples
+
+### Running All Tests
+To run all tests and verify your cryptographic and TLS modules:
+```bash
+pytest tests/
+```
+
+### Running a TLS Handshake Experiment
+To run a hybrid TLS handshake and record the time taken:
+```bash
+chmod +x scripts/run_tls_experiment.sh
+./scripts/run_tls_experiment.sh HybridKEM
+```
+This will append the result to `results/time_results.csv`.
+
+### Generating Certificates
+To generate traditional, PQC, and hybrid certificates:
+```bash
+chmod +x scripts/generate_certificates.sh
+./scripts/generate_certificates.sh
+```
+
+### Analyzing Performance Results
+To plot and analyze time, energy, and memory results:
+```bash
+python scripts/evaluate_performance.py
+```
+
+---
+
+## Troubleshooting
+- **python-oqs not installed:**
+  - Ensure you have run `pip install -r requirements.txt` and that your Python environment is active.
+- **OQS-OpenSSL not found:**
+  - PQC and hybrid certificate generation requires OQS-OpenSSL. See https://github.com/open-quantum-safe/openssl for installation instructions.
+- **Permission denied on scripts:**
+  - Run `chmod +x scripts/*.sh` to make scripts executable.
+- **Test failures:**
+  - Ensure all dependencies are installed and you are running on Linux as recommended.
+- **Performance scripts not plotting:**
+  - Make sure `matplotlib` and `pandas` are installed and your results CSVs are not empty.
+
+---
+
 ## **Performance Metrics**  
 | Metric                | Tools Used                          | Output File          |  
 |-----------------------|-------------------------------------|----------------------|  

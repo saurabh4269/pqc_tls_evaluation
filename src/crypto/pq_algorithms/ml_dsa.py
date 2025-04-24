@@ -1,27 +1,30 @@
 """
-Stub for ML-DSA (Dilithium) signature. Replace with python-oqs if available.
-Expanded: Add docstring, usage, and python-oqs integration hint for ML-DSA.
+ML-DSA (Dilithium) implementation using python-oqs.
 """
+import oqs
+
 class MLDSA:
     @staticmethod
     def generate_key_pair():
-        # Placeholder: Replace with OQS Python binding if available
-        return b"mldsa_public_key", b"mldsa_private_key"
+        with oqs.Signature('Dilithium5') as sig:
+            public_key = sig.generate_keypair()
+            private_key = sig.export_secret_key()
+            return public_key, private_key
 
     @staticmethod
     def sign(private_key, data: bytes) -> bytes:
-        # Placeholder: Replace with OQS Python binding if available
-        return b"mldsa_signature"
+        with oqs.Signature('Dilithium5') as sig:
+            sig.import_secret_key(private_key)
+            return sig.sign(data)
 
     @staticmethod
     def verify(public_key, signature: bytes, data: bytes) -> bool:
-        # Placeholder: Replace with OQS Python binding if available
-        return True
+        with oqs.Signature('Dilithium5') as sig:
+            sig.import_public_key(public_key)
+            return sig.verify(data, signature)
 
 if __name__ == "__main__":
-    # Example usage (stub)
     pub, priv = MLDSA.generate_key_pair()
     msg = b"test"
     sig = MLDSA.sign(priv, msg)
-    print("Signature valid (stub):", MLDSA.verify(pub, sig, msg))
-    # To use python-oqs, install and import oqs, then replace stubs.
+    print("Signature valid:", MLDSA.verify(pub, sig, msg))

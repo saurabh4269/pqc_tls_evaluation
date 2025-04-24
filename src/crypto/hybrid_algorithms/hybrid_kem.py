@@ -1,9 +1,10 @@
 """
-Hybrid KEM: Combines ECDH and ML-KEM for hybrid key exchange.
-Expanded: Add docstring and usage example for HybridKEM.
+Hybrid KEM: Combines ECDH and ML-KEM for hybrid key exchange using real secrets.
 """
 from src.crypto.traditional_algorithms.ecdh import ECDH
 from src.crypto.pq_algorithms.ml_kem import MLKEM
+from cryptography.hazmat.primitives.kdf.concatkdf import ConcatKDFHash
+from cryptography.hazmat.primitives import hashes
 
 class HybridKEM:
     @staticmethod
@@ -15,23 +16,27 @@ class HybridKEM:
     @staticmethod
     def encapsulate(ecdh_pub, mlkem_pub):
         # ECDH shared secret
-        # ML-KEM shared secret
-        ecdh_secret = b"ecdh_shared_secret"  # Placeholder
+        # For demo, generate a new ECDH key for the peer
+        peer_priv = ECDH.generate_key_pair()
+        ecdh_secret = ECDH.derive_shared_secret(peer_priv, ecdh_pub)
         mlkem_ct, mlkem_secret = MLKEM.encapsulate(mlkem_pub)
-        # Combine secrets (e.g., concatenate or KDF)
-        return (mlkem_ct, ecdh_secret + mlkem_secret)
+        # Combine secrets using a KDF
+        kdf = ConcatKDFHash(algorithm=hashes.SHA256(), length=32, otherinfo=None)
+        hybrid_secret = kdf.derive(ecdh_secret + mlkem_secret)
+        return (mlkem_ct, hybrid_secret)
 
     @staticmethod
-    def decapsulate(ecdh_priv, mlkem_ct, mlkem_priv):
-        # ECDH shared secret
-        # ML-KEM shared secret
-        ecdh_secret = b"ecdh_shared_secret"  # Placeholder
+    def decapsulate(ecdh_priv, mlkem_ct, mlkem_priv, peer_pub):
+        ecdh_secret = ECDH.derive_shared_secret(ecdh_priv, peer_pub)
         mlkem_secret = MLKEM.decapsulate(mlkem_ct, mlkem_priv)
-        return ecdh_secret + mlkem_secret
+        kdf = ConcatKDFHash(algorithm=hashes.SHA256(), length=32, otherinfo=None)
+        hybrid_secret = kdf.derive(ecdh_secret + mlkem_secret)
+        return hybrid_secret
 
 if __name__ == "__main__":
-    # Example usage (stub)
-    ecdh_priv, mlkem_pub, mlkem_priv = HybridKEM.generate_key_pair()
-    mlkem_ct, shared1 = HybridKEM.encapsulate(None, mlkem_pub)
-    shared2 = HybridKEM.decapsulate(ecdh_priv, mlkem_ct, mlkem_priv)
-    print("Hybrid shared secrets match (stub):", shared1 == shared2)
+    ecdh_priv = ECDH.generate_key_pair()
+    ecdh_pub = ecdh_priv.public_key()
+    mlkem_pub, mlkem_priv = MLKEM.generate_key_pair()
+    mlkem_ct, shared1 = HybridKEM.encapsulate(ecdh_pub, mlkem_pub)
+    shared2 = HybridKEM.decapsulate(ecdh_priv, mlkem_ct, mlkem_priv, ecdh_pub)
+    print("Hybrid shared secrets match:", shared1 == shared2)

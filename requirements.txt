@@ -2,5 +2,4 @@ cryptography
 psutil
 matplotlib
 pandas
-# For PQC support, install python-oqs if available
-# python-oqs
+python-oqs
